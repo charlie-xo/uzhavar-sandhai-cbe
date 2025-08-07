@@ -1,10 +1,9 @@
-// app/dashboard/page.tsx - Puthu UI-oda
-import { createServerComponentClient } from '@supabase/auth-helpers-nextjs';
-import { cookies } from 'next/headers';
+// app/dashboard/page.tsx
 import Link from 'next/link';
+import { createClient } from '@/lib/supabase/server';
 import DeleteButton from '@/components/DeleteButton';
-import { Button, buttonVariants } from "@/components/ui/button"; // Puthusa import panrom
-import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card"; // Puthusa import panrom
+import { Button, buttonVariants } from "@/components/ui/button";
+import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 
 type Product = {
   id: number;
@@ -15,14 +14,14 @@ type Product = {
 };
 
 export default async function Dashboard() {
-  const supabase = createServerComponentClient({ cookies });
+  const supabase = createClient();
   const { data: { user } } = await supabase.auth.getUser();
   const { data: products, error } = await supabase.from('products').select('*');
 
   if (error) console.error('Error fetching products:', error);
 
   return (
-    <div className="container mx-auto p-4">
+    <main className="container mx-auto p-4">
       <div className="flex justify-between items-center mb-6">
         <h1 className="text-3xl font-bold">Engal Porutkal</h1>
         <Link href="/products/add" className={buttonVariants({ variant: "default" })}>
@@ -51,6 +50,6 @@ export default async function Dashboard() {
           </Card>
         ))}
       </div>
-    </div>
+    </main>
   );
 }

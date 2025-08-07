@@ -1,4 +1,4 @@
-// app/products/edit/[id]/page.tsx - Puthu UI-oda
+// app/products/edit/[id]/page.tsx
 'use client';
 
 import { useState, useEffect, useCallback } from 'react';
@@ -20,6 +20,7 @@ export default function EditProductPage() {
   const [description, setDescription] = useState('');
   const [price, setPrice] = useState('');
   const [loading, setLoading] = useState(true);
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   const fetchProduct = useCallback(async () => {
     if (id) {
@@ -40,18 +41,22 @@ export default function EditProductPage() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    setIsSubmitting(true);
     const { error } = await supabase.from('products').update({ name, description, price: Number(price) }).eq('id', id);
-    if (error) alert('Error: Porulai thirutha mudiyavillai. ' + error.message);
-    else {
+    if (error) {
+      alert('Error: Porulai thirutha mudiyavillai. ' + error.message);
+    } else {
       alert('Porul vetrigaramaga thiruthapattathu!');
       router.push('/dashboard');
+      router.refresh();
     }
+    setIsSubmitting(false);
   };
 
-  if (loading) return <div className="container mx-auto p-4 text-center">Loading...</div>;
+  if (loading) return <main className="container mx-auto p-4 text-center">Loading...</main>;
 
   return (
-    <div className="container mx-auto p-4 flex justify-center">
+    <main className="container mx-auto p-4 flex justify-center">
       <Card className="w-full max-w-md">
         <CardHeader>
           <CardTitle>Porulai Thiruthu</CardTitle>
@@ -61,20 +66,22 @@ export default function EditProductPage() {
           <form onSubmit={handleSubmit} className="space-y-4">
             <div className="space-y-2">
               <Label htmlFor="name">Porulin Peyar</Label>
-              <Input id="name" type="text" value={name} onChange={(e) => setName(e.target.value)} required />
+              <Input id="name" type="text" value={name} onChange={(e) => setName(e.target.value)} required disabled={isSubmitting} />
             </div>
             <div className="space-y-2">
               <Label htmlFor="description">Vivaram</Label>
-              <Textarea id="description" value={description} onChange={(e) => setDescription(e.target.value)} />
+              <Textarea id="description" value={description} onChange={(e) => setDescription(e.target.value)} disabled={isSubmitting} />
             </div>
             <div className="space-y-2">
               <Label htmlFor="price">Vilai (₹)</Label>
-              <Input id="price" type="number" value={price} onChange={(e) => setPrice(e.target.value)} required />
+              <Input id="price" type="number" value={price} onChange={(e) => setPrice(e.target.value)} required disabled={isSubmitting} />
             </div>
-            <Button type="submit" className="w-full">Update Seiyavum</Button>
+            <Button type="submit" className="w-full" disabled={isSubmitting}>
+              {isSubmitting ? 'Update Seikirean...' : 'Update Seiyavum'}
+            </Button>
           </form>
         </CardContent>
       </Card>
-    </div>
+    </main>
   );
 }
