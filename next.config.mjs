@@ -4,7 +4,8 @@ const nextConfig = {
     remotePatterns: [
       {
         protocol: 'https',
-        hostname: 'rdjteyborajprnmmdxho.supabase.co',
+        // Intha thadava kandippa sariyana URL-a serthachu
+        hostname: 'rrdjteiybprajmnmdxho.supabase.co',
         port: '',
         pathname: '/storage/v1/object/public/product_images/**',
       },

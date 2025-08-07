@@ -10,39 +10,42 @@ import { Label } from '@/components/ui/label';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { toast } from 'sonner';
 
-export default function SignupPage() {
+export default function LoginPage() {
   const supabase = createClient();
   const router = useRouter();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
 
-  const handleSignup = async (e: React.FormEvent) => {
+  const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsSubmitting(true);
 
-    const { error } = await supabase.auth.signUp({
+    const { error } = await supabase.auth.signInWithPassword({
       email,
       password,
     });
 
     if (error) {
-      toast.error("Signup tholviyurradhu", { description: error.message });
+      toast.error("Login tholviyurradhu", { description: error.message });
+      setIsSubmitting(false);
     } else {
-      toast.success('Signup vetrigaram!', { description: "Unga email-a check panni confirm pannunga."});
+      toast.success("Vetrigaramaga login seiyapattathu!");
+      // Ithu romba mukkiyam: Login aanathum, page-a muzusa refresh panrom.
+      // Appo thaan middleware sariya velai seiyum.
+      window.location.href = '/dashboard';
     }
-    setIsSubmitting(false);
   };
 
   return (
     <main className="container mx-auto p-4 flex justify-center items-center min-h-screen">
       <Card className="w-full max-w-md">
         <CardHeader>
-          <CardTitle>Puthu Kanakkai Uruvaku</CardTitle>
-          <CardDescription>Aarambika, unga vivarangalai kudunga.</CardDescription>
+          <CardTitle>Ulla Nulai</CardTitle>
+          <CardDescription>Unga kanakkai thodanga.</CardDescription>
         </CardHeader>
         <CardContent>
-          <form onSubmit={handleSignup} className="space-y-4">
+          <form onSubmit={handleLogin} className="space-y-4">
             <div className="space-y-2">
               <Label htmlFor="email">Email</Label>
               <Input id="email" type="email" value={email} onChange={(e) => setEmail(e.target.value)} required disabled={isSubmitting} />
@@ -52,14 +55,14 @@ export default function SignupPage() {
               <Input id="password" type="password" value={password} onChange={(e) => setPassword(e.target.value)} required disabled={isSubmitting} />
             </div>
             <Button type="submit" className="w-full" disabled={isSubmitting}>
-              {isSubmitting ? 'Uruvakugirom...' : 'Signup'}
+              {isSubmitting ? 'Nulaikirom...' : 'Login'}
             </Button>
           </form>
         </CardContent>
         <CardFooter className="text-center text-sm">
-          <p>Already kanaku iruka?&nbsp;</p>
-          <Link href="/login" className="font-semibold text-blue-600 hover:underline">
-            Ingu Login seiyavum
+          <p>Puthu kanaku illaya?&nbsp;</p>
+          <Link href="/signup" className="font-semibold text-blue-600 hover:underline">
+            Ingu Signup seiyavum
           </Link>
         </CardFooter>
       </Card>
