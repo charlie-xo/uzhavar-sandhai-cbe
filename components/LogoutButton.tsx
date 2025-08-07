@@ -1,9 +1,9 @@
-// components/LogoutButton.tsx
 'use client';
 
 import { createClient } from '@/lib/supabase/client';
 import { useRouter } from 'next/navigation';
 import { Button } from './ui/button';
+import { toast } from 'sonner';
 
 export default function LogoutButton() {
   const router = useRouter();
@@ -11,7 +11,8 @@ export default function LogoutButton() {
 
   const handleLogout = async () => {
     await supabase.auth.signOut();
-    router.push('/login');
+    toast.success("Vetrigaramaga veliyerinirgal!");
+    router.push('/');
     router.refresh();
   };
 

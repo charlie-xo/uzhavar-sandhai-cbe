@@ -1,4 +1,3 @@
-// app/login/page.tsx
 'use client';
 
 import { useState } from 'react';
@@ -9,30 +8,28 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
+import { toast } from 'sonner';
 
-export default function LoginPage() {
+export default function SignupPage() {
   const supabase = createClient();
   const router = useRouter();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
-  const [error, setError] = useState<string | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
 
-  const handleLogin = async (e: React.FormEvent) => {
+  const handleSignup = async (e: React.FormEvent) => {
     e.preventDefault();
-    setError(null);
     setIsSubmitting(true);
 
-    const { error } = await supabase.auth.signInWithPassword({
+    const { error } = await supabase.auth.signUp({
       email,
       password,
     });
 
     if (error) {
-      setError(error.message);
+      toast.error("Signup tholviyurradhu", { description: error.message });
     } else {
-      router.push('/dashboard');
-      router.refresh();
+      toast.success('Signup vetrigaram!', { description: "Unga email-a check panni confirm pannunga."});
     }
     setIsSubmitting(false);
   };
@@ -41,11 +38,11 @@ export default function LoginPage() {
     <main className="container mx-auto p-4 flex justify-center items-center min-h-screen">
       <Card className="w-full max-w-md">
         <CardHeader>
-          <CardTitle>Ulla Nulai</CardTitle>
-          <CardDescription>Unga kanakkai thodanga.</CardDescription>
+          <CardTitle>Puthu Kanakkai Uruvaku</CardTitle>
+          <CardDescription>Aarambika, unga vivarangalai kudunga.</CardDescription>
         </CardHeader>
         <CardContent>
-          <form onSubmit={handleLogin} className="space-y-4">
+          <form onSubmit={handleSignup} className="space-y-4">
             <div className="space-y-2">
               <Label htmlFor="email">Email</Label>
               <Input id="email" type="email" value={email} onChange={(e) => setEmail(e.target.value)} required disabled={isSubmitting} />
@@ -54,16 +51,15 @@ export default function LoginPage() {
               <Label htmlFor="password">Password</Label>
               <Input id="password" type="password" value={password} onChange={(e) => setPassword(e.target.value)} required disabled={isSubmitting} />
             </div>
-            {error && <p className="text-red-500 text-sm">{error}</p>}
             <Button type="submit" className="w-full" disabled={isSubmitting}>
-              {isSubmitting ? 'Nulaikirom...' : 'Login'}
+              {isSubmitting ? 'Uruvakugirom...' : 'Signup'}
             </Button>
           </form>
         </CardContent>
         <CardFooter className="text-center text-sm">
-          <p>Puthu kanaku illaya?&nbsp;</p>
-          <Link href="/signup" className="font-semibold text-blue-600 hover:underline">
-            Ingu Signup seiyavum
+          <p>Already kanaku iruka?&nbsp;</p>
+          <Link href="/login" className="font-semibold text-blue-600 hover:underline">
+            Ingu Login seiyavum
           </Link>
         </CardFooter>
       </Card>

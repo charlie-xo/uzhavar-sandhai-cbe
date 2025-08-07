@@ -1,10 +1,10 @@
-// components/DeleteButton.tsx
 'use client';
 
 import { createClient } from "@/lib/supabase/client";
 import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { useState } from "react";
+import { toast } from "sonner";
 
 export default function DeleteButton({ productId }: { productId: number }) {
   const supabase = createClient();
@@ -15,10 +15,13 @@ export default function DeleteButton({ productId }: { productId: number }) {
     if (confirm('Indha porulai neekividava?')) {
       setIsDeleting(true);
       const { error } = await supabase.from('products').delete().eq('id', productId);
+      
       if (error) {
-        alert('Error: Porulai neeka mudiyavillai. ' + error.message);
+        toast.error('Error: Porulai neeka mudiyavillai.', {
+          description: error.message,
+        });
       } else {
-        alert('Porul vetrigaramaga neekapattathu!');
+        toast.success('Porul vetrigaramaga neekapattathu!');
         router.refresh();
       }
       setIsDeleting(false);

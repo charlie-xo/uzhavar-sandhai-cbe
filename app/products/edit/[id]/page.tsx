@@ -1,4 +1,3 @@
-// app/products/edit/[id]/page.tsx
 'use client';
 
 import { useState, useEffect, useCallback } from 'react';
@@ -10,6 +9,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { toast } from 'sonner';
 
 export default function EditProductPage() {
   const supabase = createClient();
@@ -29,7 +29,7 @@ export default function EditProductPage() {
     if (id) {
       const { data, error } = await supabase.from('products').select('*').eq('id', id).single();
       if (error) {
-        alert('Porulin thagavalai edukka mudiyavillai.');
+        toast.error('Porulin thagavalai edukka mudiyavillai.');
         router.push('/dashboard');
       } else if (data) {
         setName(data.name);
@@ -55,7 +55,7 @@ export default function EditProductPage() {
     
     const { data: { user } } = await supabase.auth.getUser();
     if (!user) {
-        alert('Login seiyavum.');
+        toast.error('Login seiyavum.');
         setIsSubmitting(false);
         return;
     }
@@ -68,7 +68,9 @@ export default function EditProductPage() {
         .upload(filePath, imageFile);
 
       if (uploadError) {
-        alert('Error: Puthu padathai upload seiya mudiyavillai. ' + uploadError.message);
+        toast.error('Error: Puthu padathai upload seiya mudiyavillai.', {
+          description: uploadError.message,
+        });
         setIsSubmitting(false);
         return;
       }
@@ -79,9 +81,11 @@ export default function EditProductPage() {
 
     const { error } = await supabase.from('products').update({ name, description, price: Number(price), image_url: imageUrl }).eq('id', id);
     if (error) {
-      alert('Error: Porulai thirutha mudiyavillai. ' + error.message);
+      toast.error('Error: Porulai thirutha mudiyavillai.', {
+        description: error.message,
+      });
     } else {
-      alert('Porul vetrigaramaga thiruthapattathu!');
+      toast.success('Porul vetrigaramaga thiruthapattathu!');
       router.push('/dashboard');
       router.refresh();
     }
@@ -101,7 +105,7 @@ export default function EditProductPage() {
           <form onSubmit={handleSubmit} className="space-y-4">
             {currentImageUrl && (
               <div className="relative w-full h-48 mb-4">
-                <Image src={currentImageUrl} alt="Current product image" layout="fill" objectFit="cover" className="rounded-md" />
+                <Image src={currentImageUrl} alt="Current product image" fill style={{objectFit: 'cover'}} className="rounded-md" />
               </div>
             )}
             <div className="space-y-2">

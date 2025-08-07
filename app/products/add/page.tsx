@@ -1,4 +1,3 @@
-// app/products/add/page.tsx
 'use client';
 
 import { useState } from 'react';
@@ -9,6 +8,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { toast } from 'sonner';
 
 export default function AddProductPage() {
   const supabase = createClient();
@@ -31,7 +31,7 @@ export default function AddProductPage() {
     
     const { data: { user } } = await supabase.auth.getUser();
     if (!user) {
-      alert('Login seithaal mattume porulai serka mudiyum.');
+      toast.error('Login seithaal mattume porulai serka mudiyum.');
       router.push('/login');
       setIsSubmitting(false);
       return;
@@ -45,7 +45,9 @@ export default function AddProductPage() {
         .upload(filePath, imageFile);
 
       if (uploadError) {
-        alert('Error: Padathai upload seiya mudiyavillai. ' + uploadError.message);
+        toast.error('Error: Padathai upload seiya mudiyavillai.', {
+          description: uploadError.message,
+        });
         setIsSubmitting(false);
         return;
       }
@@ -66,9 +68,11 @@ export default function AddProductPage() {
     });
 
     if (insertError) {
-      alert('Error: Porulai serka mudiyavillai. ' + insertError.message);
+      toast.error('Error: Porulai serka mudiyavillai.', {
+        description: insertError.message,
+      });
     } else {
-      alert('Porul vetrigaramaga serkapattathu!');
+      toast.success('Porul vetrigaramaga serkapattathu!');
       router.push('/dashboard');
       router.refresh();
     }
