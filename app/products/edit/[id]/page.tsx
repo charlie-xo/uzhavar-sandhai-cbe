@@ -4,6 +4,7 @@
 import { useState, useEffect, useCallback } from 'react';
 import { createClient } from '@/lib/supabase/client';
 import { useRouter, useParams } from 'next/navigation';
+import Image from 'next/image';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -19,6 +20,8 @@ export default function EditProductPage() {
   const [name, setName] = useState('');
   const [description, setDescription] = useState('');
   const [price, setPrice] = useState('');
+  const [currentImageUrl, setCurrentImageUrl] = useState<string | null>(null);
+  const [imageFile, setImageFile] = useState<File | null>(null);
   const [loading, setLoading] = useState(true);
   const [isSubmitting, setIsSubmitting] = useState(false);
 
@@ -32,6 +35,7 @@ export default function EditProductPage() {
         setName(data.name);
         setDescription(data.description || '');
         setPrice(String(data.price));
+        setCurrentImageUrl(data.image_url);
       }
       setLoading(false);
     }
@@ -39,10 +43,41 @@ export default function EditProductPage() {
 
   useEffect(() => { fetchProduct(); }, [fetchProduct]);
 
+  const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (e.target.files && e.target.files[0]) {
+      setImageFile(e.target.files[0]);
+    }
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsSubmitting(true);
-    const { error } = await supabase.from('products').update({ name, description, price: Number(price) }).eq('id', id);
+    
+    const { data: { user } } = await supabase.auth.getUser();
+    if (!user) {
+        alert('Login seiyavum.');
+        setIsSubmitting(false);
+        return;
+    }
+
+    let imageUrl = currentImageUrl;
+    if (imageFile) {
+      const filePath = `${user.id}/${Date.now()}_${imageFile.name}`;
+      const { error: uploadError } = await supabase.storage
+        .from('product_images')
+        .upload(filePath, imageFile);
+
+      if (uploadError) {
+        alert('Error: Puthu padathai upload seiya mudiyavillai. ' + uploadError.message);
+        setIsSubmitting(false);
+        return;
+      }
+      
+      const { data: publicUrlData } = supabase.storage.from('product_images').getPublicUrl(filePath);
+      imageUrl = publicUrlData.publicUrl;
+    }
+
+    const { error } = await supabase.from('products').update({ name, description, price: Number(price), image_url: imageUrl }).eq('id', id);
     if (error) {
       alert('Error: Porulai thirutha mudiyavillai. ' + error.message);
     } else {
@@ -64,6 +99,11 @@ export default function EditProductPage() {
         </CardHeader>
         <CardContent>
           <form onSubmit={handleSubmit} className="space-y-4">
+            {currentImageUrl && (
+              <div className="relative w-full h-48 mb-4">
+                <Image src={currentImageUrl} alt="Current product image" layout="fill" objectFit="cover" className="rounded-md" />
+              </div>
+            )}
             <div className="space-y-2">
               <Label htmlFor="name">Porulin Peyar</Label>
               <Input id="name" type="text" value={name} onChange={(e) => setName(e.target.value)} required disabled={isSubmitting} />
@@ -75,6 +115,10 @@ export default function EditProductPage() {
             <div className="space-y-2">
               <Label htmlFor="price">Vilai (₹)</Label>
               <Input id="price" type="number" value={price} onChange={(e) => setPrice(e.target.value)} required disabled={isSubmitting} />
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="image">Puthu Padathai Maatru</Label>
+              <Input id="image" type="file" onChange={handleImageChange} accept="image/*" disabled={isSubmitting} />
             </div>
             <Button type="submit" className="w-full" disabled={isSubmitting}>
               {isSubmitting ? 'Update Seikirean...' : 'Update Seiyavum'}
